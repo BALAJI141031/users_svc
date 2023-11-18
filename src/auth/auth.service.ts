@@ -14,7 +14,7 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
-  async signup(signUpDto: SignUpDto): Promise<Tokens> {
+  async signup(signUpDto: SignUpDto) {
     try {
       const { firstName, lastName, email, password, userName } = signUpDto;
       const hash = await argon.hash(password);
@@ -27,7 +27,7 @@ export class AuthService {
       });
       const tokens = await this.getTokens(user.id, user.email);
       await this.updateRtHash(user.id, tokens.refresh_token);
-      return tokens;
+      return { ...tokens, userName, email };
     } catch (error) {
       if (
         error instanceof PrismaClientKnownRequestError &&
@@ -37,11 +37,10 @@ export class AuthService {
         if (uniqueFields.includes('email')) {
           throw new BadRequestException('Email is already taken.');
         }
-        if (uniqueFields.includes('username')) {
+        if (uniqueFields.includes('userName')) {
           throw new BadRequestException('Username is already taken.');
         }
       }
-      console.log('error------------->', error, 'error----------------->');
       throw error;
     }
   }
