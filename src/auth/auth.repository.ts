@@ -7,6 +7,14 @@ import { Prisma } from '@prisma/client';
 export class AuthRepository {
   constructor(private readonly prismaService: PrismaService) {}
   async create(data: Prisma.UserCreateInput) {
-    await this.prismaService.user.create({ data });
+    return await this.prismaService.user.create({ data });
+  }
+  async update(userId: number, data: Prisma.UserUpdateInput) {
+    await this.prismaService.user.update({
+      where: {
+        id: userId,
+      },
+      data,
+    });
   }
 }
