@@ -1,5 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { SignUpDto } from './dto';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { SignInDto, SignUpDto } from './dto';
 import { AuthRepository } from './auth.repository';
 import { Tokens } from './types';
 import { JwtService } from '@nestjs/jwt';
@@ -44,8 +49,59 @@ export class AuthService {
       throw error;
     }
   }
-  async signin() {}
-  async logout() {}
+  async signin(signInDto: SignInDto) {
+    try {
+      const { email, password } = signInDto;
+      //no need to check null for use, handled in query level
+      const { hash, id, userName, firstName, lastName } =
+        await this.authRepository.getUserByEmail(email, {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          userName: true,
+          hash: true,
+        });
+      const passwordMatches = await argon.verify(hash, password);
+      if (!passwordMatches) throw new ForbiddenException('Access Denied');
+      const { refresh_token, access_token } = await this.getTokens(id, email);
+      await this.updateRtHash(id, refresh_token);
+      return {
+        refresh_token,
+        access_token,
+        email,
+        firstName,
+        lastName,
+        userName,
+      };
+    } catch (error) {
+      if (
+        error instanceof PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException('User Not Found.');
+      }
+      throw error;
+    }
+  }
+  async logout(userId: number): Promise<boolean> {
+    try {
+      await this.authRepository.updateMany(
+        {
+          id: userId,
+          hashedRt: {
+            not: null,
+          },
+        },
+        {
+          hashedRt: null,
+        },
+      );
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  }
   async refresh() {}
 
   // ---------------*****************Utils*********************-------

@@ -17,4 +17,20 @@ export class AuthRepository {
       data,
     });
   }
+  async getUserByEmail(email: string, select: Prisma.UserSelect) {
+    const resp = await this.prismaService.user.findFirstOrThrow({
+      where: { email },
+      select,
+    });
+    return resp;
+  }
+  async updateMany(where: Prisma.UserWhereInput, data: Prisma.UserUpdateInput) {
+    await this.prismaService.user.updateMany({
+      where,
+      data: {
+        hashedRt: null,
+      },
+    });
+    return true;
+  }
 }
