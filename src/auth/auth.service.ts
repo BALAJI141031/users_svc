@@ -31,7 +31,7 @@ export class AuthService {
         userName,
       });
       const tokens = await this.getTokens(user.id, user.email);
-      await this.updateRtHash(user.id, tokens.refresh_token);
+      await this.updateRtHash(user.id, tokens.refreshToken);
       return { ...tokens, userName, email };
     } catch (error) {
       if (
@@ -64,11 +64,11 @@ export class AuthService {
         });
       const passwordMatches = await argon.verify(hash, password);
       if (!passwordMatches) throw new ForbiddenException('Access Denied');
-      const { access_token, refresh_token } = await this.getTokens(id, email);
-      await this.updateRtHash(id, refresh_token);
+      const { accessToken, refreshToken } = await this.getTokens(id, email);
+      await this.updateRtHash(id, refreshToken);
       return {
-        refresh_token,
-        access_token,
+        accessToken,
+        refreshToken,
         email,
         firstName,
         lastName,
@@ -114,7 +114,7 @@ export class AuthService {
       console.log(rtMatches);
       if (!rtMatches) throw new ForbiddenException('Access Denied');
       const tokens = await this.getTokens(id, email);
-      await this.updateRtHash(id, tokens.refresh_token);
+      await this.updateRtHash(id, tokens.refreshToken);
       return tokens;
     } catch (error) {
       throw error;
@@ -146,6 +146,6 @@ export class AuthService {
         },
       ),
     ]);
-    return { access_token, refresh_token };
+    return { accessToken: access_token, refreshToken: refresh_token };
   }
 }
