@@ -30,12 +30,13 @@ export class AuthController {
   @UseGuards(AtGuard)
   async logout(@Req() req: Request) {
     const user = req['user'];
-    this.authService.logout(user['sub']);
+    return this.authService.logout(user['sub']);
   }
   @Post('refresh')
-  // @UseGuards(AuthGuard('jwt-refresh'))
+  @UseGuards(RtGuard)
   @HttpCode(HttpStatus.OK)
-  async refresh() {
-    this.authService.refresh();
+  async refresh(@Req() req: Request) {
+    const user = req['user'];
+    return this.authService.refresh(user['email'], user['refreshToken']);
   }
 }

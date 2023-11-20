@@ -102,7 +102,24 @@ export class AuthService {
       throw error;
     }
   }
-  async refresh() {}
+  async refresh(email: string, rt: string) {
+    try {
+      const { hashedRt, id } = await this.authRepository.getUserByEmail(email, {
+        id: true,
+        email: true,
+        hash: true,
+        hashedRt: true,
+      });
+      const rtMatches = await argon.verify(hashedRt, rt);
+      console.log(rtMatches);
+      if (!rtMatches) throw new ForbiddenException('Access Denied');
+      const tokens = await this.getTokens(id, email);
+      await this.updateRtHash(id, tokens.refresh_token);
+      return tokens;
+    } catch (error) {
+      throw error;
+    }
+  }
 
   // ---------------*****************Utils*********************-------
   async updateRtHash(userId: number, rt: string): Promise<void> {
