@@ -64,7 +64,7 @@ export class AuthService {
         });
       const passwordMatches = await argon.verify(hash, password);
       if (!passwordMatches) throw new ForbiddenException('Access Denied');
-      const { refresh_token, access_token } = await this.getTokens(id, email);
+      const { access_token, refresh_token } = await this.getTokens(id, email);
       await this.updateRtHash(id, refresh_token);
       return {
         refresh_token,
