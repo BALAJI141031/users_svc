@@ -33,4 +33,11 @@ export class AuthRepository {
     });
     return true;
   }
+  async getUserById(id: number, select: Prisma.UserSelect) {
+    const resp = await this.prismaService.user.findFirstOrThrow({
+      where: { id },
+      select,
+    });
+    return resp;
+  }
 }

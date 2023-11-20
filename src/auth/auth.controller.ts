@@ -12,7 +12,6 @@ import { SignInDto, SignUpDto } from './dto';
 import { Request } from 'express';
 import { RtGuard } from './common/gaurds/rt.guard';
 import { AtGuard } from './common/gaurds';
-import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
